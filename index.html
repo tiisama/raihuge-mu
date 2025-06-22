@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ライフゲーム</title>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+    }
+    #grid {
+      display: grid;
+      margin: 20px auto;
+      border: 2px solid #444;
+    }
+    .cell {
+      width: 20px;
+      height: 20px;
+      border: 1px solid #222;
+      background-color: black;
+    }
+    .alive {
+      background-color: white;
+    }
+    #start {
+      background-color: #21d900;
+      border: none;
+      color: black;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      margin-top: 20px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    #start:hover {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <h1>ライフゲーム</h1>
+  <div id="grid"></div>
+  <button id="start">スタート！</button>
+
+  <script>
+    const rows = 20;
+    const cols = 30;
+    const gridElement = document.getElementById('grid');
+    const startButton = document.getElementById('start');
+    let cells = [];
+
+    gridElement.style.gridTemplateRows = `repeat(${rows}, 20px)`;
+    gridElement.style.gridTemplateColumns = `repeat(${cols}, 20px)`;
+
+    // 初期グリッド作成
+    for (let y = 0; y < rows; y++) {
+      cells[y] = [];
+      for (let x = 0; x < cols; x++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.x = x;
+        cell.dataset.y = y;
+        cell.addEventListener('click', () => {
+          cell.classList.toggle('alive');
+        });
+        gridElement.appendChild(cell);
+        cells[y][x] = cell;
+      }
+    }
+
+    function getNextState() {
+      const newState = [];
+      for (let y = 0; y < rows; y++) {
+        newState[y] = [];
+        for (let x = 0; x < cols; x++) {
+          const cell = cells[y][x];
+          const isAlive = cell.classList.contains('alive');
+          let aliveNeighbors = 0;
+
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              if (dx === 0 && dy === 0) continue;
+              const ny = y + dy;
+              const nx = x + dx;
+              if (ny >= 0 && ny < rows && nx >= 0 && nx < cols) {
+                if (cells[ny][nx].classList.contains('alive')) {
+                  aliveNeighbors++;
+                }
+              }
+            }
+          }
+
+          if (isAlive) {
+            newState[y][x] = aliveNeighbors === 2 || aliveNeighbors === 3;
+          } else {
+            newState[y][x] = aliveNeighbors === 3;
+          }
+        }
+      }
+      return newState;
+    }
+
+    function updateGrid(newState) {
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          cells[y][x].classList.toggle('alive', newState[y][x]);
+        }
+      }
+    }
+
+    startButton.addEventListener('click', () => {
+      const newState = getNextState();
+      updateGrid(newState);
+    });
+  </script>
+</body>
+</html>
